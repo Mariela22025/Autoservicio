@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestión de Usuario</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    input {
+      margin-bottom: 12px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .links {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .links a {
+      color: #007bff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .links a:hover {
+      text-decoration: underline;
+    }
+    .message {
+      color: green;
+      font-size: 0.9em;
+      margin-top: 8px;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- 🔹 Pantalla de Inicio de Sesión -->
+    <div id="loginScreen">
+      <h2>Iniciar Sesión</h2>
+      <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Usuario" required />
+        <input type="password" id="loginPassword" placeholder="Contraseña" required />
+        <button type="submit">Ingresar</button>
+        <p id="loginMessage"></p>
+      </form>
+      <div class="links">
+        <a id="goRegister">Registrarse</a> | 
+        <a id="goForgot">¿Olvidó su contraseña?</a>
+      </div>
+    </div>
+
+    <!-- 🔹 Pantalla de Registro -->
+    <div id="registerScreen" style="display:none;">
+      <h2>Registrar Usuario</h2>
+      <form id="registerForm">
+        <input type="text" id="regUsername" placeholder="Usuario" required />
+        <input type="email" id="regEmail" placeholder="Correo electrónico" required />
+        <input type="password" id="regPassword" placeholder="Contraseña" required />
+        <button type="submit">Registrar</button>
+        <p id="registerMessage"></p>
+      </form>
+      <div class="links">
+        <a id="goLoginFromRegister">Volver al inicio</a>
+      </div>
+    </div>
+
+   <!-- 🔹 Pantalla de Recuperar Contraseña -->
+<div id="forgotScreen" style="display:none;">
+  <h2>Recuperar Contraseña</h2>
+  <form id="forgotForm">
+    <input type="text" id="forgotUsername" placeholder="Usuario" required />
+    <input type="email" id="forgotEmail" placeholder="Correo electrónico" required />
+    <input type="password" id="forgotNewPassword" placeholder="Nueva contraseña" required />
+    <input type="password" id="forgotConfirmPassword" placeholder="Confirmar nueva contraseña" required />
+    <button type="submit">Actualizar Contraseña</button>
+    <p id="forgotMessage"></p>
+  </form>
+  <div class="links">
+    <a id="goLoginFromForgot">Volver al inicio</a>
+  </div>
+</div>
+
+
+  </div>
+
+  <script>
+    // 🧭 Navegación entre pantallas
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const forgotScreen = document.getElementById('forgotScreen');
+
+    document.getElementById('goRegister').onclick = () => {
+      loginScreen.style.display = 'none';
+      registerScreen.style.display = 'block';
+    };
+    document.getElementById('goForgot').onclick = () => {
+      loginScreen.style.display = 'none';
+      forgotScreen.style.display = 'block';
+    };
+    document.getElementById('goLoginFromRegister').onclick = () => {
+      registerScreen.style.display = 'none';
+      loginScreen.style.display = 'block';
+    };
+    document.getElementById('goLoginFromForgot').onclick = () => {
+      forgotScreen.style.display = 'none';
+      loginScreen.style.display = 'block';
+    };
+
+    // 🟢 Registro de usuario
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('regUsername').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+
+      const res = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, email })
+      });
+
+      const data = await res.json();
+      const messageEl = document.getElementById('registerMessage');
+      if (res.ok) {
+        messageEl.textContent = data.message;
+        messageEl.className = 'message';
+      } else {
+        messageEl.textContent = data.error || 'Error al registrar';
+        messageEl.className = 'error';
+      }
+    });
+
+    // 🟠 Inicio de sesión (puedes conectar esto a tu API de login más adelante)
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      // En este punto, podrías validar con tu backend (no implementado aún)
+      const messageEl = document.getElementById('loginMessage');
+      messageEl.textContent = `Intentando iniciar sesión como ${username}...`;
+      messageEl.className = 'message';
+    });
+
+   
+    // 🔵 Recuperar / Actualizar contraseña
+document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('forgotUsername').value;
+  const email = document.getElementById('forgotEmail').value;
+  const newPassword = document.getElementById('forgotNewPassword').value;
+  const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+  const messageEl = document.getElementById('forgotMessage');
+
+  // Validar coincidencia de contraseñas
+  if (newPassword !== confirmPassword) {
+    messageEl.textContent = 'Las contraseñas no coinciden.';
+    messageEl.className = 'error';
+    return;
+  }
+
+  // Enviar solicitud al backend
+  try {
+    const res = await fetch('/api/users/update-password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, newPassword })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      messageEl.textContent = data.message || 'Contraseña actualizada correctamente.';
+      messageEl.className = 'message';
+    } else {
+      messageEl.textContent = data.error || 'Error al actualizar la contraseña.';
+      messageEl.className = 'error';
+    }
+  } catch (err) {
+    console.error(err);
+    messageEl.textContent = 'Error de conexión con el servidor.';
+    messageEl.className = 'error';
+  }
+});
+
+  </script>
+</body>
+</html>
